@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Single Track Car Race Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f4f4f9;
+    }
+    h1 {
+        margin-top: 20px;
+    }
+    .track {
+        width: 800px;
+        height: 150px;
+        background-color: #ddd;
+        margin: 15px auto;
+        position: relative;
+        border: 2px solid #999;
+        overflow: hidden;
+    }
+    .car {
+        width: 50px;
+        height: 30px;
+        position: absolute;
+        border-radius: 10px;
+        transition: left 0.1s linear;
+    }
+    .car:nth-child(1) { background-color: red; top: 10px; }
+    .car:nth-child(2) { background-color: green; top: 40px; }
+    .car:nth-child(3) { background-color: blue; top: 70px; }
+    .car:nth-child(4) { background-color: purple; top: 100px; }
+    .car:nth-child(5) { background-color: yellow; top: 130px; }
+    .buttons {
+        margin: 20px;
+    }
+    #result {
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #333;
+    }
+</style>
+</head>
+<body>
+
+<h1>Pick Your Car and Start the Race!</h1>
+<p>Select a car number (1-5) and see if it wins!</p>
+<div class="buttons">
+    <label for="vote">Your Car:</label>
+    <select id="vote">
+        <option value="1">Car 1</option>
+        <option value="2">Car 2</option>
+        <option value="3">Car 3</option>
+        <option value="4">Car 4</option>
+        <option value="5">Car 5</option>
+    </select>
+    <button onclick="startRace()">Start Race</button>
+</div>
+
+<div class="track" id="raceTrack">
+    <div class="car" id="car1"></div>
+    <div class="car" id="car2"></div>
+    <div class="car" id="car3"></div>
+    <div class="car" id="car4"></div>
+    <div class="car" id="car5"></div>
+</div>
+
+<p id="result"></p>
+
+<script>
+    let raceInterval;
+    let raceStarted = false;
+    const trackLength = 750; // Finish line for the race
+    const raceDuration = 60000; // Race duration in milliseconds (1 minute)
+
+    function startRace() {
+        if (raceStarted) return;
+        raceStarted = true;
+        document.getElementById("result").textContent = "The race has started!";
+        
+        const selectedCar = parseInt(document.getElementById("vote").value);
+        const cars = Array.from(document.querySelectorAll('.car'));
+        cars.forEach(car => car.style.left = '0px');
+
+        raceInterval = setInterval(() => {
+            let winner = null;
+            cars.forEach((car, index) => {
+                let currentPos = parseInt(car.style.left || '0');
+                let newPos = currentPos + Math.floor(Math.random() * 10);
+                car.style.left = newPos + 'px';
+
+                // Follow the selected car
+                if (index + 1 === selectedCar) {
+                    document.getElementById("raceTrack").scrollLeft = newPos - 50;
+                }
+
+                if (newPos >= trackLength && !winner) {
+                    winner = index + 1;
+                    endRace(winner);
+                }
+            });
+        }, 100);
+
+        // Stop the race automatically after 1 minute
+        setTimeout(() => {
+            if (raceStarted) {
+                endRace(null); // End the race without a winner if time is up
+            }
+        }, raceDuration);
+    }
+
+    function endRace(winner) {
+        raceStarted = false;
+        clearInterval(raceInterval);
+
+        const userVote = parseInt(document.getElementById("vote").value);
+        let resultText;
+        if (winner) {
+            resultText = userVote === winner ? 
+                `Car ${winner} wins! Congratulations, your car won!` : 
+                `Car ${winner} wins! Better luck next time.`;
+        } else {
+            resultText = "Time's up! No car crossed the finish line in time.";
+        }
+        document.getElementById("result").textContent = resultText;
+    }
+</script>
+
+</body>
+</html>
